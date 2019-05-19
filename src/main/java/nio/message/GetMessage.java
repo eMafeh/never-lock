@@ -18,7 +18,7 @@ public class GetMessage<T extends Serializable> {
     public GetMessage(final User sender, int i, byte[] bytes) {
         this.obj = SerializableUtil.deSerializ(bytes);
         this.rpcService = RpcService.get(i);
-        this.sender = new UserDto(sender);
+        this.sender = sender == null ? null : new UserDto(sender);
         ExceptionUtil.isTrue(rpcService != null && rpcService.support(obj), () -> "order num " + i + " not support service");
     }
 

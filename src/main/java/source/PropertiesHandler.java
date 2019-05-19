@@ -4,6 +4,7 @@ import common.util.ThreadUtil;
 import lombok.ToString;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,6 @@ public class PropertiesHandler {
                 e.printStackTrace();
             }
         }, "properties");
-        Thread thread = ret;
         ret.setDaemon(true);
         ret.start();
     }
@@ -68,7 +68,7 @@ public class PropertiesHandler {
             System.arraycopy(NODES[i], 0, USE_NODES[i], 0, NODES[i].length);
         }
         if (PROPERTIES.exists() && PROPERTIES.isFile()) {
-            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(PROPERTIES), "UTF-8")) {
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(PROPERTIES), StandardCharsets.UTF_8)) {
                 Properties properties = new Properties();
                 properties.load(reader);
                 putProperties(properties, USE_NODES);

@@ -15,12 +15,18 @@ public class User {
     public final int mainPort;
     private String name;
     public final List<Consumer<String>> listenName = Collections.synchronizedList(new ArrayList<>());
+    /**
+     * 1 在线 0 离线
+     */
     private int status;
     public final List<IntConsumer> listenStatus = Collections.synchronizedList(new ArrayList<>());
     public final List<Consumer<String>> listenGetMsg = Collections.synchronizedList(new ArrayList<>());
     public final List<SendMessageListener> listenSendMsg = Collections.synchronizedList(new ArrayList<>());
     private static final ThreadPoolExecutor EXECUTOR = ThreadUtil.createPool(1, 1, "user-change");
     public static final List<Consumer<User>> LISTEN_CREATE = Collections.synchronizedList(new ArrayList<>());
+    /**
+     * 确保 ip port 一定 全局一定只有一个user
+     */
     private static final Map<String, User> SINGLE_POOL = new ConcurrentHashMap<>();
 
     private User(final String host, final int mainPort) {
@@ -85,11 +91,11 @@ public class User {
         return this;
     }
 
-    private String uniqueIdentifier() {
+    public String uniqueIdentifier() {
         return uniqueIdentifier(host, mainPort);
     }
 
-    private static String uniqueIdentifier(String host, int mainPort) {
+    public static String uniqueIdentifier(String host, int mainPort) {
         return host + ":" + mainPort;
     }
 

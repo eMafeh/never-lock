@@ -152,7 +152,9 @@ public class ServerBoot {
     void service(BaseChannelProxy proxy, GetMessage msg) {
         if (proxy instanceof ChannelServer) {
             if (msg.rpcService instanceof JoinService) {
-
+                ((JoinService) msg.rpcService).join(msg, (ChannelServer) proxy);
+            } else {
+                System.out.println("can not service noJoin ChannelServer " + msg);
             }
         } else {
             msg.doService();
@@ -178,7 +180,7 @@ public class ServerBoot {
             System.out.println("join " + mainPort + " " + channelServer);
             ChannelServer.ChannelJoin join = channelServer.toJoin(mainPort);
             try {
-                SelectionKey register = join.channel.register(boot.selector, OPS, join);
+                join.channel.register(boot.selector, OPS, join);
                 System.out.println("server to join " + join);
                 boot.cacheChannel.handlerJoinChannel(join);
             } catch (ClosedChannelException e) {
