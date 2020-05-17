@@ -1,87 +1,61 @@
 package view;
 
-import dto.TransMsg;
-import dto.UserDto;
+import common.util.StaticBeanFactory;
 import nio.core.User;
-import service.TransMsgService;
-import view.common.ConstListener;
-import view.common.MyTextArea;
-import view.common.SimpleScrollBarUI;
+import view.common.MyTransferHandler;
+import view.friend.UserView;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.function.Consumer;
 
-import static view.common.ViewConstance.*;
-
-public class ViewFriend {
-    private final User user;
-    private final ViewMain viewMain;
-    private final JPanel right = new JPanel();
-    private final UserButton left;
-    private final MyTextArea input = new MyTextArea();
-    private final MyTextArea history = new MyTextArea();
-    private final JScrollPane historyScroll;
-
-    public ViewFriend(final ViewMain viewMain, final User user) {
-        this.viewMain = viewMain;
-        this.user = user;
+/**
+ * @author 88382571
+ * 2019/5/9
+ */
+class ViewFriend {
+    ViewFriend(User user) {
+        ViewMain viewMain = StaticBeanFactory.get(ViewMain.class);
         JPanel msgView = viewMain.msgView;
-
+        MyTransferHandler newHandler = new MyTransferHandler(file -> {
+            user.newFile(file);
+            if (user != User.SELF) {
+                user.sendFile(file);
+            }
+        });
+        /* 左侧单个用户 */
+        final UserButton left = new UserButton(user);
+        left.setTransferHandler(newHandler);
+        /* 右侧单个卡片 */
+        final UserView right = new UserView(user, newHandler);
+        //增加卡片 调整卡片大小
         msgView.add(user.uniqueIdentifier(), right);
         right.setPreferredSize(msgView.getPreferredSize());
-        historyScroll = history();
-        input();
 
-        left = new UserButton(viewMain, user);
-        Consumer<String> msgListen = msg -> {
+        //监听接收信息
+        Consumer<String> messageListener = msg -> {
             if (msg != null) {
-                addHistory(msg);
-                viewMain.root.show();
+                right.history.addMsg(msg, false);
+                SwingUtilities.getRoot(right)
+                        .setVisible(true);
             }
             viewMain.friendsView.remove(left);
             viewMain.friendsView.add(left, 0);
-            viewMain.friendsView.revalidate();
+            //聊天内容唤出
             left.doClick();
         };
-        msgListen.accept(null);
-        user.listenGetMsg.add(msgListen);
+        messageListener.accept(null);
+        user.listenGetMsg.add(messageListener);
 
-    }
-
-    private void addHistory(final String msg) {
-        history.append(msg + "\n");
-        history.validate();
-        JScrollBar bar = historyScroll.getVerticalScrollBar();
-        bar.setValue(bar.getMaximum());
-    }
-
-    private void input() {
-        input.addFocusListener(ConstListener.FOCUS_LISTENER);
-        input.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(final KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    JTextArea textArea = (JTextArea) e.getComponent();
-                    String text = textArea.getText();
-                    textArea.setText("");
-                    e.consume();
-                    addHistory(text);
-                    if (user.equals(viewMain.root.self)) {
-
-                    } else {
-                        viewMain.root.leader.sendMsg(TransMsgService.class, new TransMsg(new UserDto(user), text), Integer.MAX_VALUE);
-                    }
-                }
+        user.listenGetFile.add(file -> {
+            if (file != null) {
+                right.history.addPic(file);
+                SwingUtilities.getRoot(right)
+                        .setVisible(true);
             }
+            viewMain.friendsView.remove(left);
+            viewMain.friendsView.add(left, 0);
+            //聊天内容唤出
+            left.doClick();
         });
-        SimpleScrollBarUI.scroll(input, right, new Dimension(RIGHT_WIDTH, INPUT_HEIGHT));
-    }
-
-    private JScrollPane history() {
-        history.setEnabled(false);
-        return SimpleScrollBarUI.scroll(history, right, new Dimension(RIGHT_WIDTH, HISTORY_HEIGHT));
     }
 }

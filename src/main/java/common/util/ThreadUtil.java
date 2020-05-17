@@ -1,11 +1,12 @@
 package common.util;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author 88382571
+ * 2019/4/25
+ */
 public class ThreadUtil {
     private static final ThreadGroup GROUP = System.getSecurityManager() == null ? Thread.currentThread()
             .getThreadGroup() : System.getSecurityManager()
@@ -15,7 +16,12 @@ public class ThreadUtil {
         return new Thread(GROUP, () -> {
             System.out.println(Thread.currentThread()
                     .getName() + " is start");
-            runnable.run();
+            try {
+                runnable.run();
+            } finally {
+                System.out.println(Thread.currentThread()
+                        .getName() + " is end");
+            }
         }, name, 0);
     }
 
@@ -28,13 +34,14 @@ public class ThreadUtil {
     }
 
     public static ThreadPoolExecutor createPool(int corePoolSize, int maximumPoolSize, String prefix) {
-        return new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(10), new ThreadFactory() {
-            AtomicLong atomicLong = new AtomicLong();
+        return new ThreadPoolExecutor(corePoolSize, maximumPoolSize, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(1000), new ThreadFactory() {
+            AtomicLong aLong = new AtomicLong();
 
             @Override
-            public Thread newThread(final Runnable r) {
-                return createThread(r, prefix + atomicLong.incrementAndGet());
+            public Thread newThread(Runnable r) {
+                return createThread(r, prefix + aLong.incrementAndGet());
             }
-        }, new ThreadPoolExecutor.AbortPolicy());
+        }, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 }

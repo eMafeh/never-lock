@@ -1,0 +1,4 @@
+cd /;
+jar_target=`find / -name never-lock-1.5.1.jar`;
+java_target=`find / -name java|grep  "/openjdk-1.8.0_92/bin/java"|head -1`;
+$java_target -jar $jar_target

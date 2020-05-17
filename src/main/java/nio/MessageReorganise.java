@@ -1,34 +1,28 @@
 package nio;
 
-import common.util.ThreadUtil;
-import nio.message.GetMessage;
-
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
 
-public class MessageReorganise {
-    final ThreadPoolExecutor Executor = ThreadUtil.createPool(4, 8, "msg-consumer-");
-    final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
-    long count = 0;
-    int length;
-    final byte[] prefix = new byte[5];
-    final BaseChannelProxy proxy;
+class MessageReorganise {
+    private final LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
+    private final Consumer<byte[]> consumer;
+    private long count = 0;
+    private int length;
+    private final byte[] prefix = new byte[4];
     /**
      * 队列第一个
      */
     private byte[] next;
-
     /**
      * 第一个的下标
      */
-    int index;
-    int rpcService;
+    private int index;
 
-    public MessageReorganise(final BaseChannelProxy baseChannelProxy) {
-        this.proxy = baseChannelProxy;
+    MessageReorganise(Consumer<byte[]> consumer) {
+        this.consumer = consumer;
     }
 
-    public void receive(final byte[] data) {
+    void receive(byte[] data) {
         //队列里加入新的data
         queue.add(data);
         //记录当前总长度
@@ -39,48 +33,44 @@ public class MessageReorganise {
     private void receive() {
         //获取prefix
         if (length <= 0) {
-            int pl = prefix.length;
-            if (count < pl) {
+            int pL = prefix.length;
+            if (count < pL) {
                 return;
             }
-            //去报文头长度
-            count -= pl
-            ;
-            for (int i = 0; i < pl
-                    ; i++) {
+            //取报文头长度
+            count -= pL;
+            for (int i = 0; i < pL; i++) {
                 while (next == null || next.length <= index) {
                     next = queue.remove();
                     index = 0;
                 }
                 prefix[i] = next[index++];
             }
+            //报文长度
             this.length = RpcService.getLength(prefix);
-            this.rpcService = prefix[4];
         }
-        //取报文体
+        //拼接str
         if (length > 0 && count >= length) {
             //取 length 报文长度
             count -= length;
+
             byte[] result = new byte[length];
             int strIndex = 0;
             while (strIndex < length) {
-                while (next == null || next.length <= length) {
+                while (next == null || next.length <= index) {
                     next = queue.remove();
                     index = 0;
-
                 }
+
                 int nextDl = next.length - index;
                 int need = length - strIndex;
                 int dl = Math.min(need, nextDl);
-                System.arraycopy(next, index, result, strIndex
-                        , dl);
+                System.arraycopy(next, index, result, strIndex, dl);
                 index += dl;
                 strIndex += dl;
-
             }
             length = -1;
-            int i = this.rpcService;
-            Executor.execute(() -> proxy.serverBoot.service(proxy, new GetMessage(proxy.user, i, result)));
+            consumer.accept(result);
             receive();
         }
     }

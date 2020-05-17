@@ -1,7 +1,10 @@
 package view;
 
+import common.util.ExceptionUtil;
+import common.util.StaticBeanFactory;
 import common.util.ThreadUtil;
 import nio.core.User;
+import unlock.PropertiesHandler;
 import view.common.MyIconImage;
 
 import javax.swing.*;
@@ -10,14 +13,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import static common.RobotHandler.*;
-import static view.common.ViewConstance.*;
+import static common.RobotHandler.X_MAX;
+import static common.RobotHandler.Y_MAX;
+import static view.common.ViewConstance.HEIGHT;
+import static view.common.ViewConstance.WIDTH;
 
+/**
+ * @author 88382571
+ * 2019/5/6
+ */
 public class ViewRoot {
     private final JFrame ROOT = new JFrame();
-    private final ViewMain viewMain;
-    final User self;
-    final User leader;
 
     private volatile long hiddenTime = Long.MAX_VALUE;
     private final Thread HIDDEN = ThreadUtil.createLoopThread(() -> {
@@ -27,73 +33,71 @@ public class ViewRoot {
                 Thread.sleep(l);
             } else {
                 hiddenTime = Long.MAX_VALUE;
-                hidden();
+                ROOT.setVisible(false);
             }
         } catch (InterruptedException e) {
         }
-    }, "hidden-view");
+    }, "view-hidden");
 
 
-    public ViewRoot(final String name, final String iconPath, final User leader, final User self) {
-        this.leader = leader;
-        this.self = self;
-        this.viewMain = new ViewMain(this);
+    public ViewRoot(String name, String iconPath) {
+        ExceptionUtil.consumer = User.SELF::newMsg;
+        StaticBeanFactory.put(ViewRoot.class, this);
+        ViewMain viewMain = new ViewMain();
+        //简单布局
         ROOT.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
+        //总是顶层显示
         ROOT.setAlwaysOnTop(true);
+        //默认居中
         ROOT.setBounds((X_MAX - WIDTH) / 2, (Y_MAX - HEIGHT) / 2, WIDTH, HEIGHT);
+        //去除标题框且整体透明度降低 顺序不可颠倒
         ROOT.setUndecorated(true);
-        ROOT.setOpacity(0.75F);
-
-
-        JPanel titlePanel;
+        ROOT.setOpacity(0.75f);
+        PropertiesHandler.LISTEN_CHANGE_PRO.put("Opacity", value -> {
+            float opacity = Float.parseFloat(value);
+            ROOT.setOpacity(opacity);
+        });
         try {
-            BufferedImage read = MyIconImage.get(iconPath);
-            TrayIcon icon = new TrayIcon(read, name, new PopupMenu());
+            BufferedImage image = MyIconImage.get(iconPath);
+            //监听模式 匿名内部类 ——Swing应用，创建通知区域图标，赋予双击事件
+            //创建一个通知区域图标
+            TrayIcon icon = new TrayIcon(image, name, new PopupMenu());
             icon.setImageAutoSize(true);
+            //图标增加鼠标点击监听者
             icon.addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(final MouseEvent e) {
+                public void mouseClicked(MouseEvent e) {
+                    //当鼠标的连击次数为2
                     if (e.getClickCount() == 2) {
-                        show();
+                        //显示窗口
+                        ROOT.setVisible(true);
                     }
                 }
             });
-            ROOT.setIconImage(read);
+            ROOT.setIconImage(image);
             SystemTray systemTray = SystemTray.getSystemTray();
             systemTray.add(icon);
-            titlePanel = TitleView.titlePanel(name, () -> {
+
+            JMenuBar title = new TitleView(name, () -> ROOT.setVisible(false), () -> {
                 systemTray.remove(icon);
                 System.exit(0);
-            }, this::hidden, (dx, dy) -> {
+            }, (dx, dy) -> {
                 Point location = ROOT.getLocation();
                 ROOT.setLocation(location.x + dx, location.y + dy);
-
             });
+            ROOT.setJMenuBar(title);
         } catch (AWTException e) {
-            throw new RuntimeException(e);
+            ExceptionUtil.throwT(e);
         }
-        ROOT.add(titlePanel);
         ROOT.add(viewMain.getMain());
-        show();
-        HIDDEN.start();
-        viewMain.createUser(leader);
-        if (!leader.equals(self)) {
-            viewMain.createUser(self);
-        }
-        User.LISTEN_CREATE.add(viewMain::createUser);
-
-    }
-
-    private void hidden() {
-        ROOT.setVisible(false);
-    }
-
-    void show() {
         ROOT.setVisible(true);
+        HIDDEN.start();
+
+        User.init(viewMain::createUser, false);
     }
 
-    public void show(final String msg, final int time) {
-        self.newMsg(msg);
+    public void show(String msg, int time) {
+        User.SELF.newMsg(msg);
         hiddenTime = System.currentTimeMillis() + time * 1000;
         HIDDEN.interrupt();
     }

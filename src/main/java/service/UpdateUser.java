@@ -1,44 +1,21 @@
 package service;
 
 import dto.UserDto;
-import nio.RpcService;
 import nio.core.User;
+import nio.RpcService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.channels.SocketChannel;
 
-public class UpdateUser extends RpcService<Object> {
-    public UpdateUser() {
-        super(2);
-    }
-
-    @Override
-    public void service(final Object o, final UserDto sender) {
-        if (o instanceof List) {
-            for (Object obj : (List) o) {
-                updateUser(obj);
-            }
-        } else {
-            updateUser(o);
-        }
-    }
-
-    private void updateUser(final Object obj) {
-        if (obj instanceof UserDto) {
-            UserDto userDto = (UserDto) obj;
-            User user = userDto.getUser()
-                    .setName(userDto.getName())
-                    .setStatus(userDto.getStatus());
-            System.out.println(" update " + user);
-        } else {
-            System.out.println(obj == null ? null : obj.getClass());
-        }
-    }
+/**
+ * @author kelaite
+ */
+public class UpdateUser extends RpcService<UserDto> {
 
     @Override
-    public boolean support(final Object obj) {
-        if (obj == null) return true;
-        Class<?> aClass = obj.getClass();
-        return aClass == UserDto.class || aClass == ArrayList.class;
+    public void service(UserDto userDto, SocketChannel channel, byte[] data) {
+        User user = userDto.getUser()
+                .setName(userDto.name)
+                .setStatus(userDto.status);
+        System.out.println("update " + user);
     }
 }

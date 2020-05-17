@@ -1,51 +1,85 @@
 package nio;
 
+import common.util.ExceptionUtil;
+import common.util.StaticBeanFactory;
 import common.util.ThreadUtil;
 import dto.UserDto;
-import nio.core.SendMessageListener;
 import nio.core.User;
-import nio.message.GetMessage;
-import nio.message.SendMessage;
-import service.HelloService;
+import nio.message.MessageDto;
+import nio.message.RemoteServicePackage;
+import service.FileService;
+import service.MsgService;
+import service.UpdateUser;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Set;
 import java.util.Stack;
 
+
+/**
+ * @author 88382571
+ * 2019/4/28
+ */
 public class ServerBoot {
     private static final int OPS = SelectionKey.OP_READ;
+    private static final Stack<SocketChannel> WHILE_REGISTER_CHANNELS = new Stack<>();
+
     private final Selector selector;
-    private final Stack<ChannelClient> whileRegisterChannels = new Stack<>();
-    private final CacheChannel cacheChannel = new CacheChannel(this);
-    private final SendFailAgain sendFailAgain;
-    final User self;
 
-    public ServerBoot(User leader, User self) throws IOException {
-        this.self = self;
-        this.selector = Selector.open();
-        int mainPort = self.mainPort;
-        cacheChannel.handlerChannel(new ChannelLocal(this));
-        System.out.println("open and handle local channel");
+    public ServerBoot() throws IOException {
+        //占用端口
         ServerSocketChannel socketChannel = ServerSocketChannel.open();
-        socketChannel.bind(new InetSocketAddress(mainPort), 1000);
+        socketChannel.bind(new InetSocketAddress(User.SELF.mainPort), 1000);
         socketChannel.configureBlocking(false);
-        socketChannel.register(selector, SelectionKey.OP_ACCEPT);
-        System.out.println("register server port " + mainPort);
 
-        ThreadUtil.createLoopThread(this::run, "selector")
-                .start();
-        sendFailAgain = new SendFailAgain(this);
-        sendListen(leader);
-        if (!self.equals(leader)) {
-            sendListen(self);
+        this.selector = Selector.open();
+        StaticBeanFactory.put(ServerBoot.class, this);
+
+        long count = DbHandler.read()
+                .stream()
+                .filter(userDto -> userDto.status != -1)
+                .map(userDto -> userDto.getUser()
+                        .setName(userDto.name))
+                .filter(a -> a == User.SELF)
+                .count();
+        if (count == 1) {
+            User.SELF.newMsg("欢迎登陆");
+        } else {
+            User.SELF.newMsg("欢迎首次登陆防锁定~~~~~");
+            DbHandler.write();
         }
-        User.LISTEN_CREATE.add(this::sendListen);
-        new JoinService(this);
-        leader.sendMsg(HelloService.class, "hello linux", Integer.MAX_VALUE);
+
+        //监听发送消息行为
+        User.init(this::listen, false);
+
+        //向其他节点注册
+        ChannelHandler.init();
+
+        //自身开始接受注册服务
+        socketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        System.out.println("register server port " + User.SELF.mainPort);
+
+        //selector 开始监听
+        ThreadUtil.createLoopThread(this::run, "server-selector")
+                .start();
+    }
+
+    private void listen(User user) {
+        //监听改名
+        if (User.SELF == user || !user.windows) {
+            user.listenName.add(name -> ChannelHandler.send(new RemoteServicePackage<>(null, UpdateUser.class, new UserDto(user))));
+        }
+        user.listenStatus.add(i -> {
+            if (i == -1) {
+                ChannelHandler.send(new RemoteServicePackage<>(null, UpdateUser.class, new UserDto(user)));
+            }
+        });
+        user.listenSendFile.add(s -> FileService.send(user, s));
+        user.listenSendMsg.add(s -> ChannelHandler.send(new RemoteServicePackage<>(user, MsgService.class, new MessageDto(s))));
+        user.listenGetMsg.add(System.out::println);
     }
 
     private void run() {
@@ -54,43 +88,60 @@ public class ServerBoot {
             selector.select();
             register();
             Set<SelectionKey> selectionKeys = selector.selectedKeys();
-            for (SelectionKey selectionKey : selectionKeys) {
-                handle(selectionKey);
+            for (SelectionKey key : selectionKeys) {
+                handle(key);
             }
             selectionKeys.clear();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            ExceptionUtil.print(e);
         }
     }
 
-    private void handle(final SelectionKey selectionKey) throws IOException {
-        SelectableChannel selectableChannel = selectionKey.channel();
+    private void handle(SelectionKey key) throws IOException {
+        SocketChannel channel;
+        SelectableChannel selectableChannel = key.channel();
         //服务端监听创建新通道
         if (selectableChannel instanceof ServerSocketChannel) {
-            SocketChannel channel = ((ServerSocketChannel) selectableChannel).accept();
-            ChannelServer server = ChannelServer.handleServer(this, channel);
-            channel.configureBlocking(false);
-            channel.register(selector, OPS, server);
-            System.out.println("register " + server);
-        } else if (!(selectableChannel instanceof SocketChannel)) {
+            channel = ((ServerSocketChannel) selectableChannel).accept();
+            register0(channel);
+        } else if (selectableChannel instanceof SocketChannel) {
+            channel = (SocketChannel) selectableChannel;
+        } else {
+            //未知通道
             throw new RuntimeException("not support this selectableChannel:" + selectableChannel.getClass());
         }
-        if (selectionKey.isReadable()) {
-            BaseChannelProxy proxy = (BaseChannelProxy) selectionKey.attachment();
+        if (key.isReadable()) {
+            MessageReorganise reorganise = (MessageReorganise) key.attachment();
             try {
-                giveData(proxy);
+                giveData(channel, reorganise);
             } catch (IOException e) {
-                cacheChannel.removeChannel(e, proxy);
+                ChannelHandler.removeChannel(e, channel);
             }
         }
+    }
 
+    void register(SocketChannel channel) throws ClosedChannelException {
+        WHILE_REGISTER_CHANNELS.push(channel);
+        selector.wakeup();
+    }
+
+    private void register() throws IOException {
+        while (!WHILE_REGISTER_CHANNELS.empty()) {
+            register0(WHILE_REGISTER_CHANNELS.pop());
+        }
+    }
+
+    private void register0(SocketChannel channel) throws IOException {
+        channel.configureBlocking(false);
+        channel.register(selector, OPS, new MessageReorganise(ServiceHandler.getMessageReorganise(channel)));
+        System.out.println("register " + channel.getRemoteAddress());
     }
 
     private final ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 1024);
 
-    private void giveData(final BaseChannelProxy proxy) throws IOException {
-        SocketChannel channel = proxy.channel;
+    private void giveData(SocketChannel channel, MessageReorganise reorganise) throws IOException {
         buffer.clear();
+        //读buffer
         while (true) {
             int read = channel.read(buffer);
             if (read == 0 || buffer.position() == buffer.limit()) {
@@ -99,93 +150,13 @@ public class ServerBoot {
                 channel.close();
             }
         }
+        //buffer改为写模式
         buffer.flip();
         int limit = buffer.limit();
         if (limit != 0) {
             byte[] data = new byte[limit];
             buffer.get(data);
-            proxy.reorganise.receive(data);
-        }
-    }
-
-    void register(ChannelClient channelClient) {
-        whileRegisterChannels.push(channelClient);
-        selector.wakeup();
-    }
-
-    private void register() throws IOException {
-        while (!whileRegisterChannels.empty()) {
-            ChannelClient pop = whileRegisterChannels.pop();
-            pop.channel.configureBlocking(false);
-            pop.channel.register(selector, OPS, pop);
-            System.out.println("register client channel " + pop);
-        }
-    }
-
-    private void sendListen(final User user) {
-        user.listenSendMsg.add(new SendMessageListener() {
-            @Override
-            public <T extends Serializable> void call(final Class<? extends RpcService<? super T>> rpcService, final T obj, final int again) {
-                send(new SendMessage(user, rpcService, obj, again));
-            }
-        });
-    }
-
-    void send(final SendMessage sendMessage) {
-        send(sendMessage, cacheChannel.getChannel(sendMessage.user));
-    }
-
-
-    void send(final SendMessage sendMessage, final BaseChannelProxy channel) {
-        try {
-            if (channel != null) {
-                channel.send(sendMessage);
-                return;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        sendFailAgain.tryAgain(sendMessage);
-    }
-
-
-    void service(BaseChannelProxy proxy, GetMessage msg) {
-        if (proxy instanceof ChannelServer) {
-            if (msg.rpcService instanceof JoinService) {
-                ((JoinService) msg.rpcService).join(msg, (ChannelServer) proxy);
-            } else {
-                System.out.println("can not service noJoin ChannelServer " + msg);
-            }
-        } else {
-            msg.doService();
-        }
-    }
-
-
-    static class JoinService extends RpcService<Integer> {
-        private final ServerBoot boot;
-
-        JoinService(ServerBoot boot) {
-            super(1);
-            this.boot = boot;
-        }
-
-        @Override
-        public void service(final Integer integer, final UserDto sender) {
-            throw new RuntimeException("should use method join");
-        }
-
-        private void join(GetMessage message, ChannelServer channelServer) {
-            int mainPort = (int) message.getObj();
-            System.out.println("join " + mainPort + " " + channelServer);
-            ChannelServer.ChannelJoin join = channelServer.toJoin(mainPort);
-            try {
-                join.channel.register(boot.selector, OPS, join);
-                System.out.println("server to join " + join);
-                boot.cacheChannel.handlerJoinChannel(join);
-            } catch (ClosedChannelException e) {
-                e.printStackTrace();
-            }
+            reorganise.receive(data);
         }
     }
 }

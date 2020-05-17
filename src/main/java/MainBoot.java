@@ -1,74 +1,36 @@
-import common.CmdInstructions;
 import common.util.DestroyedUtil;
 import common.util.SystemUtil;
-import common.util.ThreadUtil;
+import nio.DbHandler;
 import nio.ServerBoot;
-import nio.core.User;
-import service.HelloService;
-import service.ProxyMsgService;
-import service.TransMsgService;
-import service.UpdateUser;
-import source.PropertiesHandler;
+import unlock.PropertiesHandler;
 import view.ViewRoot;
 
 import java.io.IOException;
-import java.time.LocalTime;
 
+/**
+ * @author 88382571
+ * 2019/4/22
+ */
 public class MainBoot {
+
     static {
+        //		LogUtil.changeSystemOut("E:\\OCES\\temp good\\neverlock\\log.txt");
         DestroyedUtil.addListener(() -> {
         });
     }
 
-    public static void main(String[] args) throws IOException {
-        User leader = User.getUser(SystemUtil.IP, 8988);
-        User self = User.getUser(SystemUtil.IP, 8988);
+    public static void main(String[] args) throws IOException, InterruptedException {
+        System.setProperty("server.main.port", "8989");
 
-
-        view(leader, self);
-
-        new HelloService();
-        new ProxyMsgService();
-        new TransMsgService();
-        new UpdateUser();
-        new ServerBoot(leader, self);
-    }
-
-    private static void view(final User leader, final User self) {
-        if (!SystemUtil.LOCAL) {
-            return;
+        if (SystemUtil.isWindows()) {
+            //尝试创建 ui 界面 和防锁定功能
+            System.out.println("swing ui init");
+            new ViewRoot("防锁定1.5.6", "logo.png");
+            PropertiesHandler.init();
         }
-        System.out.println("swing ui init");
-        ViewRoot viewRoot = new ViewRoot("防锁定1.0.0", "icon.png", leader, self);
-        PropertiesHandler.init();
-        ThreadUtil.createLoopThread(() -> {
-            try {
-                NeverLock.unlock();
-                LocalTime now = LocalTime.now();
-                tryNode(now.getHour(), now.getMinute(), viewRoot);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        }, "never-lock")
-                .start();
+        //开启自身服务监听
+        new ServerBoot();
+        //持久化用户列表变化
+        DbHandler.autoUpdate();
     }
-
-    private static void tryNode(final int hour, final int minute, final ViewRoot viewRoot) throws IOException {
-        PropertiesHandler.TimeNode timeNode = PropertiesHandler.USE_NODES[hour][minute];
-        if (timeNode != null) {
-            boolean isFirst = timeNode != lastTimeNode;
-            if (timeNode.lock) {
-                if (timeNode.loop || isFirst) {
-                    System.out.println(timeNode);
-                    CmdInstructions.lock();
-                }
-            } else if (isFirst) {
-                System.out.println(timeNode);
-                viewRoot.show(timeNode.getMsg(), timeNode.time);
-            }
-        }
-        lastTimeNode = timeNode;
-    }
-
-    private static volatile PropertiesHandler.TimeNode lastTimeNode;
 }

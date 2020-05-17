@@ -1,8 +1,8 @@
 package view;
 
-import nio.CacheChannel;
+import common.util.StaticBeanFactory;
 import nio.core.User;
-import view.common.MyButton;
+import view.common.LabelBtn;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
@@ -11,27 +11,31 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.function.IntConsumer;
 
-import static java.awt.event.KeyEvent.VK_ENTER;
-import static java.awt.event.KeyEvent.VK_ESCAPE;
 import static view.common.ViewConstance.*;
 
-public class UserButton extends JPanel {
-    private final MyButton button;
+/**
+ * @author 88382571
+ * 2019/5/15
+ */
+class UserButton extends JPanel {
+    private final LabelBtn button;
     private final JTextField change;
 
-    UserButton(ViewMain main, User user) {
-        final boolean isSelf = user.equals(main.root.self);
+    UserButton(User user) {
+        ViewMain viewMain = StaticBeanFactory.get(ViewMain.class);
         change = new JTextField();
 
-        CardLayout cardLayout = new CardLayout(0, 0);
-        setLayout(cardLayout);
+        CardLayout mgr = new CardLayout(0, 0);
+        setLayout(mgr);
 
-        CardLayout layout = (CardLayout) main.msgView.getLayout();
-        UserButton that = this;
-        button = new MyButton(user.getNotNullName(), LEAVE, HOVER, CHOSE, "friend", (btn, e) -> {
-            layout.show(main.msgView, user.uniqueIdentifier());
-            if (isSelf && e != null && e.getClickCount() == 2) {
-                cardLayout.show(that, "change");
+        CardLayout cardLayout = (CardLayout) viewMain.msgView.getLayout();
+        final UserButton that = this;
+        button = new LabelBtn(user.getNotNullName(), LEAVE, HOVER, CHOSE, "friend", (btn, e) -> {
+            cardLayout.show(viewMain.msgView, user.uniqueIdentifier());
+            viewMain.msgView.revalidate();
+            boolean supportUser = user == User.SELF || !user.windows;
+            if (supportUser && e != null && e.getClickCount() == 2) {
+                mgr.show(that, "change");
                 change.setText(user.getNotNullName());
                 change.requestFocus();
             }
@@ -39,50 +43,64 @@ public class UserButton extends JPanel {
         button.setToolTipText(user.uniqueIdentifier());
         change.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(final KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 int keyCode = e.getKeyCode();
-                boolean submit = keyCode == VK_ENTER;
-                if (submit || keyCode == VK_ESCAPE) {
+                boolean submit = keyCode == KeyEvent.VK_ENTER;
+                if (submit || keyCode == KeyEvent.VK_ESCAPE) {
                     if (submit) {
-                        main.root.leader.sendMsg(CacheChannel.NewNameService.class, ((JTextComponent) e.getComponent()).getText(), Integer.MAX_VALUE);
+                        user.setName(((JTextComponent) e.getComponent()).getText());
                     }
-                    cardLayout.show(that, "button");
+                    mgr.show(that, "button");
                     e.consume();
                 }
             }
         });
         add("change", change);
         add("button", button);
-        cardLayout.show(that, "button");
+        mgr.show(that, "button");
 
-
+        //样式
         setFont(new Font(Font.DIALOG, Font.PLAIN, 15));
-        setForeground(Color.black);
+        setForeground(Color.BLACK);
         setPreferredSize(new Dimension(USER_WIDTH, USER_HEIGHT));
-
-
         button.setFont(getFont());
         button.setForeground(getForeground());
         button.setPreferredSize(getPreferredSize());
-
-        change.setFont(getFont());
+        change.setFont(new Font(Font.DIALOG, Font.ITALIC, 15));
         change.setForeground(getForeground());
         change.setPreferredSize(getPreferredSize());
         change.setBorder(BORDER);
-        change.setBackground(Color.white);
-        change.setHorizontalAlignment(SwingConstants.CENTER);
+        change.setBackground(Color.WHITE);
+        change.setHorizontalAlignment(JTextField.CENTER);
 
+        //监听用户名更改事件
         user.listenName.add(button::setText);
 
-        if (!isSelf) {
-            IntConsumer intConsumer = status -> button.icon(status == 0 ? OFFLINE : ONLINE, 30);
-            intConsumer.accept(user.getStatus());
-            user.listenStatus.add(intConsumer);
-        }
+        if (User.SELF != user) {
+            //监听用户状态更改
+            IntConsumer statusListener;
+            statusListener = user.windows ? status -> {
+                if (status == 1) {
+                    button.icon(ONLINE, 33);
+                } else {
+                    button.icon(OFFLINE, 27);
+                }
+            } : status -> {
+                if (status == 1) {
+                    button.icon(LINK, 25);
 
+                } else if (status == 0) {
+                    button.icon(UNLINK, 20);
+                } else {
+                    button.icon(REMOVE, 20);
+                }
+            };
+            statusListener.accept(user.getStatus());
+            user.listenStatus.add(statusListener);
+        }
     }
 
-    public void doClick() {
+    void doClick() {
         button.colorClick.accept(null);
     }
 }

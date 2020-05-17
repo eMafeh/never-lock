@@ -6,18 +6,22 @@ import java.awt.event.FocusListener;
 
 import static view.common.ViewConstance.WHITE;
 
+/**
+ * @author 88382571
+ * 2019/5/15
+ */
 public interface ConstListener {
-    FocusListener FOCUS_LISTENER = new FocusListener() {
-        @Override
-        public void focusGained(final FocusEvent e) {
-            e.getComponent()
-                    .setBackground(Color.WHITE);
-        }
-
-        @Override
-        public void focusLost(final FocusEvent e) {
-            e.getComponent()
-                    .setBackground(WHITE);
-        }
-    };
+	FocusListener FOCUS_WHITE = new FocusListener() {
+		@Override
+		public void focusGained(FocusEvent e) {
+			e.getComponent()
+					.setBackground(Color.WHITE);
+		}
+		
+		@Override
+		public void focusLost(FocusEvent e) {
+			e.getComponent()
+					.setBackground(WHITE);
+		}
+	};
 }
