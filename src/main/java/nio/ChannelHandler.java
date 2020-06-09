@@ -45,11 +45,7 @@ public class ChannelHandler {
         };
         //心跳连接所有linux
         ThreadUtil.createLoopThread(() -> {
-            User.getAll()
-                    .filter(a -> a != User.SELF)
-                    .filter(user -> user.getStatus() != -1)
-                    .filter(a -> !a.windows)
-                    .forEach(ChannelHandler::handlerNew);
+//            User.getAll().filter(a -> a != User.SELF).filter(user -> user.getStatus() != -1).filter(a -> !a.windows).forEach(ChannelHandler::handlerNew);
             first[0].run();
             try {
                 Thread.sleep(15000L);

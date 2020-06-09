@@ -41,48 +41,8 @@ public class UserView extends JPanel {
         history = new HistoryArea(this, newHandler);
         userBar = new UserBar(this);
         input = new InputArea(this, new Dimension(RIGHT_WIDTH, INPUT_HEIGHT));
-        AbstractAction action = new AbstractAction() {
-            {
-                putValue(Action.NAME, "截屏");
-                putValue(Action.SHORT_DESCRIPTION, "捕捉屏幕");
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Component root = SwingUtilities.getRoot(history);
-                root.setVisible(false);
-                ScreenshotAction.pre(image -> {
-                    if (image != null) {
-                        //写入本地文件
-                        File file = new File("Downloads" + File.separator + UUID.randomUUID()
-                                .toString() + ".png");
-                        try {
-                            File parentFile = file.getParentFile();
-                            if (!parentFile.exists()) {
-                                parentFile.mkdirs();
-                            }
-                            ImageIO.write(image, "png", file);
-                            user.newFile(file);
-                            if (user != User.SELF) {
-                                user.sendFile(file);
-                            }
-                        } catch (IOException e1) {
-                            Arrays.stream(e1.getStackTrace())
-                                    .forEach(element -> history.addMsg(element.toString(), true));
-                        }
-                    }
-                    root.setVisible(true);
-                });
-            }
-        };
-        JButton comp = new JButton(action);
-        comp.setBackground(LEAVE);
-        userBar.add(comp);
-        getActionMap()
-                .put("screenshot", action);
-        getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke("alt A"), "screenshot");
-
+        userBar.add(new ScreenshotButton(this));
+        userBar.add(new ClearButton(this));
         input.addFocusListener(ConstListener.FOCUS_WHITE);
         input.addKeyListener(new KeyAdapter() {
             @Override

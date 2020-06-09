@@ -117,7 +117,7 @@ public class HistoryArea extends JPanel {
         });
         EventQueue.invokeLater(() -> {
             add(comp);
-            revalidate();
+            repaint();
         });
     }
 

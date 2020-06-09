@@ -51,13 +51,10 @@ public class DbHandler {
                 }
             });
         } else {
-            //监听后续新建用户,修改用户,更新文件
-            User.init(user -> {
-                user.listenName.add(s -> write());
-                write();
-            },false);
-            User.getAll()
-                    .forEach(user -> user.listenName.add(s -> write()));
+            //监听修改用户信息,更新文件
+            User.init(user -> user.listenName.add(s -> write()), false);
+            //监听后续新建用户,更新文件
+            User.init(user -> write(), true);
             //关闭后，更新
             DestroyedUtil.addListener(DbHandler::write);
         }
