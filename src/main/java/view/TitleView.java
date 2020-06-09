@@ -1,5 +1,7 @@
 package view;
 
+import view.friend.MsbKeChengBiaoMenu;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -28,6 +30,7 @@ class TitleView extends JMenuBar {
         JButton c = button(close, CLOSE);
 
         add(title);
+        add(new MsbKeChengBiaoMenu());
         add(h);
         add(c);
 

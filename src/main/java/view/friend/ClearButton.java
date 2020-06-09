@@ -16,12 +16,10 @@ public class ClearButton extends JButton {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                Component root = SwingUtilities.getRoot(userView.history);
                 EventQueue.invokeLater(() -> {
                     userView.history.removeAll();
                     userView.history.repaint();
                 });
-//
             }
         };
         setAction(action);

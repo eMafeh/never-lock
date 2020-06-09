@@ -16,9 +16,8 @@ import static view.common.ViewConstance.LEAVE;
 
 public class ScreenshotButton extends JButton {
     public ScreenshotButton(UserView userView) {
-        AbstractAction action = new AbstractAction() {
+        AbstractAction action = new AbstractAction("截屏") {
             {
-                putValue(Action.NAME, "截屏");
                 putValue(Action.SHORT_DESCRIPTION, "捕捉屏幕");
             }
 
