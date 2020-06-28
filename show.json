@@ -1,0 +1,489 @@
+{
+  "retcode": 0,
+  "result": {
+    "comment_result": {
+      "isStudent": 1,
+      "isLevelHigh": 1,
+      "isApplied": 1,
+      "reason": "未满足评论条件，暂时不能评论！",
+      "status": 1,
+      "isTaskDone": 0,
+      "payid": 2,
+      "cid": 2145201,
+      "comment_state": 0,
+      "can_comment": false,
+      "needStudyTs": 20
+    },
+    "cur_svr_time": 1591707803,
+    "plan": {
+      "latest_study_ts": 0,
+      "cover_url": "//10.url.cn/qqcourse_logo_ng/ajNVdqHZLLAeoVFexX2HIxOq4Ysk1ibM47ZBw0q1jb1S2yPVmVQibPqZnM0QuY5ibibe8BNUT8KLVew/",
+      "term_id": 102247417,
+      "passcard": 0,
+      "industry3": 3007,
+      "term_no": 0,
+      "expr_flag": 0,
+      "map_id": 0,
+      "room_url": "tencent://VisitPublicGroup/?subcmd=VisitPublicGroupEx&amp;param=7B22457874506172616D223A7B226170704964223A223231222C22617070506172616D223A227B5C22436F7572736549645C223A3130323234373431377D227D2C2262466F72456475223A312C2267726F757055696E223A3130323234373431372C2276697369746F72223A317D",
+      "top_flag": 0,
+      "latest_task_id": 0,
+      "room_id": 102247417,
+      "agency_info": {
+        "aid": 41250
+      },
+      "transcode_flag": 0,
+      "chapter_list": [
+        {
+          "ch_id": 2370151,
+          "sub_course_list": [
+            {
+              "endtime": 1587218400,
+              "task_list": [
+                {
+                  "endtime": 1587218400,
+                  "resid_ext": {
+                    "list": [
+                      {
+                        "id": "5285890801520278929",
+                        "rec_task_id": 0,
+                        "times": 11123,
+                        "txcloud": 1,
+                        "vid": ""
+                      }
+                    ]
+                  },
+                  "status": 4,
+                  "resid_list": [
+                    "5285890801520278929"
+                  ],
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1587211200,
+                  "taid": "8661965490666417",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "RBAC-基于角色的访问控制原理和shiro介绍",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 0,
+              "name": "RBAC-基于角色的访问控制原理和shiro介绍",
+              "complement_degree": 0,
+              "csid": 15022821,
+              "complete_score": 0,
+              "bgtime": 1587211200
+            },
+            {
+              "endtime": 1587823200,
+              "task_list": [
+                {
+                  "endtime": 1587823200,
+                  "resid_ext": {
+                    "list": [
+                      {
+                        "id": "5285890801893253253",
+                        "rec_task_id": 0,
+                        "times": 12139,
+                        "txcloud": 1,
+                        "vid": ""
+                      }
+                    ]
+                  },
+                  "status": 4,
+                  "resid_list": [
+                    "5285890801893253253"
+                  ],
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1587816000,
+                  "taid": "8661969785633713",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "入门、分布式session和权限缓存解决方案",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 1,
+              "name": "shiro基础入门、分布式session和权限缓存解决方案",
+              "complement_degree": 0,
+              "csid": 15022822,
+              "complete_score": 0,
+              "bgtime": 1587816000
+            },
+            {
+              "endtime": 1589119200,
+              "task_list": [
+                {
+                  "endtime": 1589119200,
+                  "resid_ext": {
+                    "list": [
+                      {
+                        "id": "5285890802875203904",
+                        "rec_task_id": 0,
+                        "times": 10711,
+                        "txcloud": 1,
+                        "vid": ""
+                      }
+                    ]
+                  },
+                  "status": 4,
+                  "resid_list": [
+                    "5285890802875203904"
+                  ],
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1589112000,
+                  "taid": "8661974080601009",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "单点登录原理和https通信原理解析",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 2,
+              "name": "单点登录原理和https通信原理解析",
+              "complement_degree": 0,
+              "csid": 15022823,
+              "complete_score": 0,
+              "bgtime": 1589112000
+            },
+            {
+              "endtime": 1589637600,
+              "task_list": [
+                {
+                  "endtime": 1589637600,
+                  "resid_ext": {
+                    "list": [
+                      {
+                        "id": "5285890803111002537",
+                        "rec_task_id": 0,
+                        "times": 12587,
+                        "txcloud": 1,
+                        "vid": ""
+                      }
+                    ]
+                  },
+                  "status": 4,
+                  "resid_list": [
+                    "5285890803111002537"
+                  ],
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1589630400,
+                  "taid": "8661978375568305",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "手下单点登录实现",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 3,
+              "name": "手下单点登录实现",
+              "complement_degree": 0,
+              "csid": 15022824,
+              "complete_score": 0,
+              "bgtime": 1589630400
+            },
+            {
+              "endtime": 1590242400,
+              "task_list": [
+                {
+                  "endtime": 1590242400,
+                  "resid_ext": {
+                    "list": [
+                      {
+                        "id": "5285890803374327016",
+                        "rec_task_id": 0,
+                        "times": 11571,
+                        "txcloud": 1,
+                        "vid": ""
+                      }
+                    ]
+                  },
+                  "status": 4,
+                  "resid_list": [
+                    "5285890803374327016"
+                  ],
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1590235200,
+                  "taid": "8661982670535601",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "CAS单点登录和shiro+vue分层开发",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 4,
+              "name": "CAS单点登录和shiro+vue分层开发",
+              "complement_degree": 0,
+              "csid": 15022825,
+              "complete_score": 0,
+              "bgtime": 1590235200
+            },
+            {
+              "endtime": 1591452000,
+              "task_list": [
+                {
+                  "endtime": 1591452000,
+                  "resid_ext": {
+                    "list": [
+                      {
+                        "id": "5285890803882815357",
+                        "rec_task_id": 0,
+                        "times": 10588,
+                        "txcloud": 1,
+                        "vid": ""
+                      }
+                    ]
+                  },
+                  "status": 4,
+                  "resid_list": [
+                    "5285890803882815357"
+                  ],
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1591444800,
+                  "taid": "8661986965502897",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "oauth2原理",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 5,
+              "name": "oauth2原理",
+              "complement_degree": 0,
+              "csid": 15022826,
+              "complete_score": 0,
+              "bgtime": 1591444800
+            },
+            {
+              "endtime": 1592056800,
+              "task_list": [
+                {
+                  "endtime": 1592056800,
+                  "resid_ext": {},
+                  "status": 1,
+                  "resid_list": "",
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1592049600,
+                  "taid": "8661991260470193",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "shiro和springboot集成",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 6,
+              "name": "shiro和springboot集成",
+              "complement_degree": 0,
+              "csid": 15022827,
+              "complete_score": 0,
+              "bgtime": 1592049600
+            },
+            {
+              "endtime": 1592661600,
+              "task_list": [
+                {
+                  "endtime": 1592661600,
+                  "resid_ext": {},
+                  "status": 1,
+                  "resid_list": "",
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1592654400,
+                  "taid": "8661995555437489",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "oauth2登陆实现",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 7,
+              "name": "oauth2登陆实现",
+              "complement_degree": 0,
+              "csid": 15022828,
+              "complete_score": 0,
+              "bgtime": 1592654400
+            },
+            {
+              "endtime": 1593266400,
+              "task_list": [
+                {
+                  "endtime": 1593266400,
+                  "resid_ext": {},
+                  "status": 1,
+                  "resid_list": "",
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1593259200,
+                  "taid": "8661999850404785",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "企业开发综合案例",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 8,
+              "name": "企业开发综合案例",
+              "complement_degree": 0,
+              "csid": 15022829,
+              "complete_score": 0,
+              "bgtime": 1593259200
+            },
+            {
+              "endtime": 1593871200,
+              "task_list": [
+                {
+                  "endtime": 1593871200,
+                  "resid_ext": {},
+                  "status": 1,
+                  "resid_list": "",
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1593864000,
+                  "taid": "8662004145372081",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "oauth2登陆实现",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 9,
+              "name": "oauth2登陆实现",
+              "complement_degree": 0,
+              "csid": 15022830,
+              "complete_score": 0,
+              "bgtime": 1593864000
+            },
+            {
+              "endtime": 1594476000,
+              "task_list": [
+                {
+                  "endtime": 1594476000,
+                  "resid_ext": {},
+                  "status": 1,
+                  "resid_list": "",
+                  "update_ts": 0,
+                  "type": 1,
+                  "bgtime": 1594468800,
+                  "taid": "8662008440339377",
+                  "order": 0,
+                  "task_bit_flag": 64,
+                  "name": "shiro源码设计感悟（深入理解AOP设计模式）",
+                  "complement_degree": 0,
+                  "complete_score": 0
+                }
+              ],
+              "sub_id": 10,
+              "name": "shiro源码设计感悟（深入理解AOP和设计模式）",
+              "complement_degree": 0,
+              "csid": 15022831,
+              "complete_score": 0,
+              "bgtime": 1594468800
+            }
+          ],
+          "ch_no": 0,
+          "name": ""
+        }
+      ],
+      "recent_live_task": {
+        "endtime": 1591452000,
+        "task_id": 8661986965502897,
+        "type": 1,
+        "task_bit_flag": 64,
+        "name": "oauth2原理",
+        "bgtime": 1591444800
+      },
+      "sponsor": 1852303966,
+      "cid": 2145201,
+      "latest_ch_id": 2370151,
+      "process": {
+        "sub_id": 15022821,
+        "sub_no": 0,
+        "term_chapter_id": 2370151,
+        "chapter_id": 2370151,
+        "start_ts": 1587211200,
+        "sub_status": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "term_chapter_no": 0,
+        "sub_name": "RBAC-基于角色的访问控制原理和shiro介绍",
+        "term_index": 0,
+        "chapter_no": 0,
+        "term_sub_name": "oauth2原理",
+        "sub_live_status": 0,
+        "term_sub_no": 5,
+        "term_sub_id": 15022826,
+        "end_ts": 1744559999,
+        "complete_score": 0,
+        "sub_complate_score": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "ts_order": 0,
+      "latest_csid": 15022821,
+      "tname": "shiro权限框架",
+      "map_name": "",
+      "cname": "企业级Shiro大讲堂【马士兵教育】",
+      "sponsor_url": "http://sighttp.qq.com/authd?IDKEY=6490eb7ba1a58db8b4054e901f6992987b249d6e44f09916"
+    },
+    "course_info": {
+      "term_warn_type": 0,
+      "term_bit_flag": 2187328,
+      "term_refund_time": 0,
+      "payid": 2,
+      "transcode_flag": 0
+    },
+    "applied_terms": [
+      {
+        "endtime": 1744559999,
+        "apply_num": 3614,
+        "name": "shiro权限框架",
+        "term_id": 102247417,
+        "transcode_flag": 0,
+        "bgtime": 1587211200
+      }
+    ],
+    "term_installment": {
+      "head": {
+        "code": 0
+      }
+    },
+    "sponsor": 1852303966,
+    "address_state": 0,
+    "sponsor_url": "http://sighttp.qq.com/authd?IDKEY=6490eb7ba1a58db8b4054e901f6992987b249d6e44f09916"
+  }
+}

@@ -28,7 +28,7 @@ public class MsgService extends RpcService<MessageDto> {
         String msg = dto.msg;
         long begin = dto.begin;
 
-        sender.newMsg(sender.windows ? DateUtil.format("MM-dd hh:mm:ss", begin) + " : " + msg : msg);
+        sender.newMsg(sender.windows ? DateUtil.format("MM-dd HH:mm:ss", begin) + " : " + msg : msg);
         if (!User.SELF.windows && msg != null && !msg.trim()
                 .isEmpty()) {
             ThreadUtil.createThread(() -> {
